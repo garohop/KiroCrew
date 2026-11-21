@@ -41,9 +41,13 @@ export function MarkdownTableChart({ model, numeric, order, column, onColumn }: 
 }) {
   const pickerId = useId()
   const reduceMotion = useReducedMotion()
+  // Labels come from the first TEXT column (#40451), so a table whose first
+  // column is itself numeric (a rank, a year) still names its bars by the
+  // thing they measure; a table with no text column falls back to column 0.
+  const labelCol = Math.max(0, numeric.findIndex(n => !n))
   const rows = order.map(i => {
     const text = model.body[i]?.[column] ?? ''
-    return { label: model.body[i]?.[0] ?? '', value: parseNumeric(text), shown: text }
+    return { label: model.body[i]?.[labelCol] ?? '', value: parseNumeric(text), shown: text }
   })
   const values = rows.map(r => r.value).filter((v): v is number => v != null)
   const lo = Math.min(0, ...values)
@@ -74,6 +78,10 @@ export function MarkdownTableChart({ model, numeric, order, column, onColumn }: 
             <li key={order[i]} className="truncate text-text" style={{ height: ROW_H, lineHeight: `${ROW_H}px` }} title={r.label}>{r.label}</li>
           ))}
         </ol>
+        {/* A data chart, not an icon: AUTOSDE's `use-lucide-icons` rule is about
+            glyphs, and this SVG is drawn from the table's own numbers, the way
+            `canvas/CanvasEditor.tsx` and `canvas/DashedOutline.tsx` draw
+            geometry inline. The toggle that opens it is the Lucide glyph. */}
         <svg className="min-w-0 flex-1" width="100%" height={height} role="img" aria-label={i18nT('components.markdownRenderer.chart_of_column', { column: title })} data-testid="table-chart-bars">
           {lo < 0 && <line x1={`${zero}%`} x2={`${zero}%`} y1={0} y2={height} stroke="var(--border)" strokeWidth={1} />}
           {rows.map((r, i) => r.value == null ? null : (

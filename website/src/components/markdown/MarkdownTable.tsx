@@ -277,7 +277,7 @@ export function MarkdownTable({ node, children }: { node?: HastElement; children
             hover rule the pointer) so Hide chart is always reachable. */}
         {model && numericCols.length > 0 && (
           <button type="button" data-testid="table-chart-toggle" className={TABLE_ACTION_BTN_CLS}
-            onClick={() => setChartOpen(o => !o)} aria-expanded={chartOpen} aria-pressed={chartOpen}
+            onClick={() => setChartOpen(o => !o)} aria-expanded={chartOpen}
             title={chartOpen ? i18nT('components.markdownRenderer.hide_chart') : i18nT('components.markdownRenderer.show_chart')}
             aria-label={chartOpen ? i18nT('components.markdownRenderer.hide_chart') : i18nT('components.markdownRenderer.show_chart')}>
             <ChartColumn size={13} aria-hidden="true" className={chartOpen ? 'text-accent' : undefined} />

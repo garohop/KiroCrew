@@ -87,6 +87,30 @@ describe('markdown table sorting', () => {
     expect(document.activeElement).toBe(headers[0])
   })
 
+  it('stands in for the named region stop on a clipped two-row table: the header button is the keyboard stop', () => {
+    // Geometry stubbed as `MarkdownRenderer.tableKeyboardStop.test.tsx` does:
+    // 240px of columns hidden past a 320px scroller.
+    const proto = window.HTMLElement.prototype
+    const spies = [
+      vi.spyOn(proto, 'clientWidth', 'get').mockReturnValue(320),
+      vi.spyOn(proto, 'scrollWidth', 'get').mockReturnValue(320 + 240),
+      vi.spyOn(proto, 'scrollLeft', 'get').mockReturnValue(0),
+    ]
+    try {
+      render(<MarkdownRenderer content={TABLE.split('\n').slice(0, 4).join('\n')} />)
+      const scroller = screen.getByTestId('table-scroller')
+      // Two rows: the headers are sort buttons, one of them tabbable, so the
+      // scroller adds no second stop (no role, no tabindex, no name).
+      expect(screen.getAllByTestId('table-sort').filter(b => b.tabIndex === 0)).toHaveLength(1)
+      expect(scroller).not.toHaveAttribute('tabindex')
+      expect(scroller).not.toHaveAttribute('role')
+      expect(screen.queryByRole('region')).toBeNull()
+      expect(scroller.contains(screen.getAllByTestId('table-sort')[0])).toBe(true)
+    } finally {
+      for (const s of spies) s.mockRestore()
+    }
+  })
+
   it('renders plain headers while the block is still streaming or when there is a single row', () => {
     const { container, rerender } = render(<MarkdownRenderer content={TABLE} streaming />)
     expect(screen.queryByTestId('table-sort')).toBeNull()
@@ -121,7 +145,7 @@ describe('markdown table numeric columns', () => {
 
 describe('markdown table chart', () => {
   it('starts hidden, shows one bar per row for the picked numeric column in the table\'s sort order, and hides again', () => {
-    const { container } = render(<MarkdownRenderer content={TABLE} />)
+    render(<MarkdownRenderer content={TABLE} />)
     expect(screen.queryByTestId('table-chart')).toBeNull()
     const toggle = screen.getByTestId('table-chart-toggle')
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
@@ -150,6 +174,13 @@ describe('markdown table chart', () => {
     fireEvent.click(toggle)
     expect(screen.queryByTestId('table-chart')).toBeNull()
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('labels the bars from the first text column, not the first column', () => {
+    render(<MarkdownRenderer content={'| Rank | Team | Points |\n| --- | --- | --- |\n| 1 | Lions | 40 |\n| 2 | Bears | 25 |'} />)
+    fireEvent.click(screen.getByTestId('table-chart-toggle'))
+    const labels = Array.from(screen.getByTestId('table-chart').querySelectorAll('ol:first-of-type li')).map(li => li.textContent)
+    expect(labels).toEqual(['Lions', 'Bears'])
   })
 
   it('offers no chart for a table with no numeric column', () => {

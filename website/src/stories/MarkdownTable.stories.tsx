@@ -21,7 +21,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const RunsBySevice: Story = {
+export const RunsByService: Story = {
   name: 'Runs by service',
   args: {
     content: [

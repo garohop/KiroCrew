@@ -55,7 +55,11 @@ export function MdTableHeadCell({ node, children }: { node?: HastElement; childr
       <button type="button" className={SORT_BTN_CLS} data-testid="table-sort"
         tabIndex={col === view.focusCol ? 0 : -1}
         onFocus={() => view.setFocusCol(col)} onKeyDown={onKeyDown} onClick={() => view.toggleSort(col)}>
-        {children}
+        {/* The label gives way before the arrow does, as in `SortableTableHead`:
+            a narrowed column (`[&_th]:text-ellipsis` in MarkdownTable) can only
+            ellipsize text inside a block, and an inline-flex button is atomic,
+            so the span is what truncates. */}
+        <span className="truncate min-w-0">{children}</span>
         {active && <SortArrow dir={view.sort.dir} />}
       </button>
     </th>
