@@ -8520,7 +8520,11 @@
       "couldnt_copy_the_path_label": "Konnte nicht kopiert werden: der Pfad {{label}}.",
       "closed_session_open_failed": "{{name}} konnte nicht geöffnet werden.",
       "closed_session_try_again": "Erneut versuchen",
-      "unclosed_diff_warning": "Hier ist die Formatierung defekt, daher kann der Rest der Antwort in diesem Diff erscheinen."
+      "unclosed_diff_warning": "Hier ist die Formatierung defekt, daher kann der Rest der Antwort in diesem Diff erscheinen.",
+      "show_chart": "Diagramm anzeigen",
+      "hide_chart": "Diagramm ausblenden",
+      "chart_column": "Diagrammspalte",
+      "chart_of_column": "Balkendiagramm von {{column}}"
     },
     "markdownToc": {
       "contents": "Inhalt",

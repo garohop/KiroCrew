@@ -8310,7 +8310,11 @@
       "couldnt_copy_the_path_label": "コピーできませんでした：パス {{label}}",
       "closed_session_open_failed": "{{name}} を開けませんでした。",
       "closed_session_try_again": "再試行",
-      "unclosed_diff_warning": "ここで書式が崩れたため、返答の残りがこの差分の中に表示されている可能性があります。"
+      "unclosed_diff_warning": "ここで書式が崩れたため、返答の残りがこの差分の中に表示されている可能性があります。",
+      "show_chart": "グラフを表示",
+      "hide_chart": "グラフを非表示",
+      "chart_column": "グラフの列",
+      "chart_of_column": "{{column}} の棒グラフ"
     },
     "markdownToc": {
       "contents": "目次",

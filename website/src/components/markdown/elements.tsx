@@ -3,14 +3,13 @@ import type { Components } from 'react-markdown'
 import type { Element as HastElement } from 'hast'
 import { TAG_ATTRS } from './sanitize'
 import { CopyableBlockquote } from './CopyableBlockquote'
+import { MdTableCell, MdTableHeadCell } from './MarkdownTableCells'
 import {
   MD_EM_CLS,
   MD_HEADING_CLS,
   MD_LIST_ITEM_CLS,
   MD_OL_BASE_CLS,
   MD_STRONG_CLS,
-  MD_TABLE_CELL_CLS,
-  MD_TABLE_HEAD_CELL_CLS,
   MD_TASK_LIST_CLS,
   MD_UL_CLS,
 } from './typography'
@@ -116,9 +115,12 @@ function slugify(children: React.ReactNode): string | undefined {
 }
 
 export const ELEMENT_OVERRIDES = {
-  // Headers carry the column's meaning, so never break them mid-label.
-  th({ node, children }) { return <th {...spa('th', node)} className={`${MD_TABLE_HEAD_CELL_CLS} whitespace-nowrap`}>{children}</th> },
-  td({ node, children }) { return <td {...spa('td', node)} className={MD_TABLE_CELL_CLS}>{children}</td> },
+  // The cells read their table's view state (sort, numeric columns) from
+  // `MarkdownTableCtx`; with none they render the plain cell. Headers carry
+  // the column's meaning, so they never break mid-label (`whitespace-nowrap`
+  // is applied inside).
+  th({ node, children }) { return <MdTableHeadCell node={node}>{children}</MdTableHeadCell> },
+  td({ node, children }) { return <MdTableCell node={node}>{children}</MdTableCell> },
   blockquote({ node, children }) { return <CopyableBlockquote node={node}>{children}</CopyableBlockquote> },
   hr({ node }) { return <hr {...sp(node)} className="border-border my-4" /> },
   h1({ node, children }) { const id = slugify(children); return <h1 {...sp(node)} id={id} className={MD_HEADING_CLS[0]}>{children}</h1> },

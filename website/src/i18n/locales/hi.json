@@ -8520,7 +8520,11 @@
       "couldnt_copy_the_path_label": "कॉपी नहीं हो सकी: पथ {{label}}",
       "closed_session_open_failed": "{{name}} नहीं खुल सका।",
       "closed_session_try_again": "फिर से कोशिश करो",
-      "unclosed_diff_warning": "यहाँ फ़ॉर्मैटिंग टूट गई, इसलिए जवाब का बाकी हिस्सा इस diff के अंदर दिख सकता है।"
+      "unclosed_diff_warning": "यहाँ फ़ॉर्मैटिंग टूट गई, इसलिए जवाब का बाकी हिस्सा इस diff के अंदर दिख सकता है।",
+      "show_chart": "चार्ट दिखाएँ",
+      "hide_chart": "चार्ट छिपाएँ",
+      "chart_column": "चार्ट कॉलम",
+      "chart_of_column": "{{column}} का बार चार्ट"
     },
     "markdownToc": {
       "contents": "विषय-सूची",

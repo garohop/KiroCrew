@@ -8310,7 +8310,11 @@
       "couldnt_copy_the_path_label": "복사하지 못했습니다: 경로 {{label}}",
       "closed_session_open_failed": "{{name}}을(를) 열 수 없습니다.",
       "closed_session_try_again": "다시 시도",
-      "unclosed_diff_warning": "여기서 서식이 깨져 나머지 답변이 이 diff 안에 표시될 수 있습니다."
+      "unclosed_diff_warning": "여기서 서식이 깨져 나머지 답변이 이 diff 안에 표시될 수 있습니다.",
+      "show_chart": "차트 표시",
+      "hide_chart": "차트 숨기기",
+      "chart_column": "차트 열",
+      "chart_of_column": "{{column}} 막대 차트"
     },
     "markdownToc": {
       "contents": "목차",

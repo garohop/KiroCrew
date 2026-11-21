@@ -114,8 +114,10 @@ function markdownCell(cell: HastElement): string {
 /** Plain text of one cell -- formatting markers are noise in a spreadsheet.
  *  Unlike the Markdown side, a CSV field CAN hold a line break (RFC 4180 quotes
  *  it), so an author's `<br>` stays a newline here; whitespace inside a text
- *  node collapses to one space, and whitespace inside code is kept. */
-function plainCell(cell: HastElement): string {
+ *  node collapses to one space, and whitespace inside code is kept. Exported
+ *  for the table view (`components/markdown/tableData.ts`), which sorts and
+ *  parses cells from the same text the CSV copy carries. */
+export function plainCell(cell: HastElement): string {
   const walk = (n: ElementContent, inCode: boolean): string => {
     if (n.type === 'text') return inCode ? n.value : n.value.replace(/\s+/g, ' ')
     if (n.type !== 'element') return ''
@@ -263,7 +265,12 @@ export function hastTableToMarkdown(table: HastElement): string {
  *  `-0.57` and `+3%` are values and stay bare; `=WEBSERVICE(...)`, `-2+3` and
  *  `@SUM(A1)` are formulas. */
 const FORMULA_LEAD = /^[=+\-@\t\r]/
-const PLAIN_NUMBER = /^[+-]?(?:\d[\d,_\s]*)?(?:\.\d+)?\s*%?$/
+/** A bare number as a model writes one: optional sign, digits with `,` / `_` /
+ *  space grouping, optional fraction, optional `%`. Matches the empty string
+ *  too, so a caller deciding "is this a number" also asks for a digit.
+ *  Exported for the table view (`components/markdown/tableData.ts`), whose
+ *  numeric columns are decided by the same shape. */
+export const PLAIN_NUMBER = /^[+-]?(?:\d[\d,_\s]*)?(?:\.\d+)?\s*%?$/
 
 /** Spreadsheet formula injection defence: a table copied from an untrusted
  *  source (a page the agent fetched, a tool result) must not become a live

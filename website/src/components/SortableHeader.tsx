@@ -29,9 +29,11 @@ const TH_CLS = 'text-left text-muted text-[12px] uppercase tracking-[.04em] px-2
  * Without it the order was readable only through `aria-sort`, so a sighted
  * reader could not tell which column the rows followed or which way. Hidden
  * from assistive tech, which already has `aria-sort` on the header cell. Same
- * glyphs and size as `LibraryTable` and the Telemetry table.
+ * glyphs and size as `LibraryTable` and the Telemetry table. Exported for the
+ * chat Markdown table (`markdown/MarkdownTableCells`), whose header cells keep
+ * their own typography but show the same arrow.
  */
-function SortArrow({ dir }: { dir: SortState['dir'] }) {
+export function SortArrow({ dir }: { dir: SortState['dir'] }) {
   const Icon = dir === 'asc' ? ChevronUp : ChevronDown
   return <Icon size={12} className="shrink-0" aria-hidden="true" />
 }

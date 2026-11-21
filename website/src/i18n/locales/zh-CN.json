@@ -8310,7 +8310,11 @@
       "couldnt_copy_the_path_label": "无法复制路径 {{label}}。",
       "closed_session_open_failed": "无法打开 {{name}}。",
       "closed_session_try_again": "重试",
-      "unclosed_diff_warning": "此处格式出错，回复的其余部分可能显示在此 diff 中。"
+      "unclosed_diff_warning": "此处格式出错，回复的其余部分可能显示在此 diff 中。",
+      "show_chart": "显示图表",
+      "hide_chart": "隐藏图表",
+      "chart_column": "图表列",
+      "chart_of_column": "{{column}} 的条形图"
     },
     "markdownToc": {
       "contents": "目录",

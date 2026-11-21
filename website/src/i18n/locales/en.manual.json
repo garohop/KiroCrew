@@ -3261,7 +3261,11 @@
       "click_to_show_this_folder_in_the_sidebar": "Click to show this folder in the sidebar",
       "couldnt_copy_the_folder_path_label": "Couldn’t copy the folder path {{label}}.",
       "couldnt_copy_the_image_path_label": "Couldn’t copy the image path {{label}}.",
-      "couldnt_copy_the_path_label": "Couldn’t copy the path {{label}}."
+      "couldnt_copy_the_path_label": "Couldn’t copy the path {{label}}.",
+      "show_chart": "Show chart",
+      "hide_chart": "Hide chart",
+      "chart_column": "Chart column",
+      "chart_of_column": "Bar chart of {{column}}"
     },
     "mcpAppFrame": {
       "collapse": "Collapse",

@@ -1,5 +1,7 @@
 import type React from 'react'
 import { createContext } from 'react'
+import type { Element as HastElement } from 'hast'
+import type { SortState } from '../../hooks/useSortableTable'
 
 /**
  * The React contexts the markdown pipeline's modules share.
@@ -255,3 +257,27 @@ export const SidebarFolderCtx = createContext<SidebarFolderActions>({})
  * session reference, and only then, so other paragraphs keep their exact DOM.
  */
 export const ParagraphNoticeSlotCtx = createContext<HTMLElement | null>(null)
+
+/**
+ * One chat table's view state, from `MarkdownTable` to the `th` / `td`
+ * overrides react-markdown instantiates inside it (`MarkdownTableCells`).
+ *
+ * The cells are keyed by their hast node: react-markdown hands every override
+ * the same hast object the table's own `node` holds, so identity names the
+ * column without the cell knowing its index. `null` (the default, and any
+ * table `tableData.readTable` could not model) renders the plain cells.
+ */
+export interface MarkdownTableView {
+  /** Header cell -> column index, for the sort button; absent = no sort. */
+  headerIndex: ReadonlyMap<HastElement, number>
+  /** Every cell (header and body) of a numeric column: right-aligned. */
+  numericCells: ReadonlySet<HastElement>
+  /** `key` is the sorted column's index as a string, or null for source order. */
+  sort: SortState
+  toggleSort: (col: number) => void
+  /** The header buttons are ONE roving tab stop (like the column grips): the
+   *  column whose button takes Tab, and the move the arrow keys make. */
+  focusCol: number
+  setFocusCol: (col: number) => void
+}
+export const MarkdownTableCtx = createContext<MarkdownTableView | null>(null)

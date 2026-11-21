@@ -8520,7 +8520,11 @@
       "couldnt_copy_the_path_label": "কপি করা যায়নি: পাথ {{label}}",
       "closed_session_open_failed": "{{name}} খোলা যায়নি।",
       "closed_session_try_again": "আবার চেষ্টা করো",
-      "unclosed_diff_warning": "এখানে ফরম্যাটিং ভেঙে গেছে, তাই উত্তরের বাকি অংশ এই diff-এর ভেতরে দেখা যেতে পারে।"
+      "unclosed_diff_warning": "এখানে ফরম্যাটিং ভেঙে গেছে, তাই উত্তরের বাকি অংশ এই diff-এর ভেতরে দেখা যেতে পারে।",
+      "show_chart": "চার্ট দেখান",
+      "hide_chart": "চার্ট লুকান",
+      "chart_column": "চার্ট কলাম",
+      "chart_of_column": "{{column}}-এর বার চার্ট"
     },
     "markdownToc": {
       "contents": "বিষয়সূচি",

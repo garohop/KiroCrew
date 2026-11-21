@@ -8730,7 +8730,11 @@
       "couldnt_copy_the_path_label": "No se pudo copiar la ruta {{label}}.",
       "closed_session_open_failed": "No se pudo abrir {{name}}.",
       "closed_session_try_again": "Reintentar",
-      "unclosed_diff_warning": "El formato se rompió aquí, así que el resto de la respuesta puede aparecer dentro de este diff."
+      "unclosed_diff_warning": "El formato se rompió aquí, así que el resto de la respuesta puede aparecer dentro de este diff.",
+      "show_chart": "Mostrar gráfico",
+      "hide_chart": "Ocultar gráfico",
+      "chart_column": "Columna del gráfico",
+      "chart_of_column": "Gráfico de barras de {{column}}"
     },
     "markdownToc": {
       "contents": "Contenido",

@@ -1,15 +1,19 @@
-import React, { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { Check, Copy, FileSpreadsheet, FoldHorizontal, UnfoldHorizontal } from 'lucide-react'
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { ChartColumn, Check, Copy, FileSpreadsheet, FoldHorizontal, UnfoldHorizontal } from 'lucide-react'
 import type { Element as HastElement } from 'hast'
 import { copyToClipboard } from '../../utils/clipboard'
 import { hastTableToCsv, hastTableToMarkdown } from '../../utils/tableClipboard'
 import { HOVER_NONE_ACTIONS_ROW_CLS } from '../../utils/touchActions'
 import { useScrollEdges } from '../../hooks/useScrollEdges'
 import { FOCUSABLE } from '../../hooks/useDialogFocusTrap'
+import type { SortState } from '../../hooks/useSortableTable'
 import ErrorNotice from '../ErrorNotice'
 import { i18nT } from '../../i18n/t'
 import { loadChatConfig, saveChatConfig } from '../../pages/chat/ChatSettings'
+import { MarkdownTableCtx, PathProbeCtx, type MarkdownTableView } from './contexts'
 import { sp } from './elements'
+import { MarkdownTableChart } from './MarkdownTableChart'
+import { MIN_ROWS_TO_SORT, numericColumns, readTable, sortedRowOrder } from './tableData'
 import { useMarkdownTableColumns } from './useMarkdownTableColumns'
 
 /** 5u above the table (one step past a paragraph, so the grid reads as its own
@@ -24,6 +28,77 @@ const TABLE_ACTION_BTN_CLS = 'flex items-center gap-1 px-1.5 py-1 rounded text-[
  *  every table on screen, and the stored value seeds the next one rendered. */
 const subscribeChatConfig = (cb: () => void) => { window.addEventListener('mc-config-changed', cb); return () => window.removeEventListener('mc-config-changed', cb) }
 const readWidenTables = () => loadChatConfig().widenTables
+
+const UNSORTED: SortState = { key: null, dir: null }
+
+/** The body's `<tr>` elements in `order`, every other child untouched.
+ *
+ *  Sorting is VIEW state: the hast node (and so Copy Markdown / Copy CSV) keeps
+ *  the source order, and the rows react-markdown rendered are reordered as
+ *  the elements they already are, so a cell's inline chrome (a code chip, a
+ *  link) is the same element in either order. react-markdown strips the
+ *  whitespace text between table rows, so the body's children are exactly its
+ *  rows; a body whose row count disagrees with the model (mid-stream, a tree
+ *  the model did not read) is left in source order rather than mis-paired.
+ *  Always mapped, so the children's keys are the same whether or not a sort is
+ *  active and a sort never remounts the table's sections. */
+function orderRows(children: React.ReactNode, order: number[] | null): React.ReactNode {
+  return React.Children.map(children, child => {
+    if (!order || !React.isValidElement<{ children?: React.ReactNode }>(child) || child.type !== 'tbody') return child
+    const rows = React.Children.toArray(child.props.children)
+    if (rows.length !== order.length) return child
+    return React.cloneElement(child, undefined, order.map(i => rows[i]))
+  })
+}
+
+/**
+ * The table's view state: which column it is sorted by, which columns are
+ * numeric and how each cell of them is shown, and the order its rows are
+ * displayed in.
+ *
+ * A header click cycles ascending, descending, source order. The state lives
+ * with the rendered message, not in storage: a transcript table has no
+ * identity to key a saved sort on, and the next table the agent writes should
+ * open in the order it was written.
+ */
+function useTableView(node: HastElement | undefined) {
+  // Off while the block is still typing (`PathProbeCtx` is false only then,
+  // the way Mermaid waits for `block.complete`): a half-streamed table has
+  // rows still to come, and its columns can still change kind. Off, too, for
+  // a table with fewer than two body rows: nothing to sort or chart, so it
+  // renders exactly as before.
+  const settled = useContext(PathProbeCtx)
+  const model = useMemo(() => {
+    if (!node || !settled) return null
+    const read = readTable(node)
+    return read && read.bodyRows.length >= MIN_ROWS_TO_SORT ? read : null
+  }, [node, settled])
+  const numeric = useMemo(() => (model ? numericColumns(model.body, model.header.length) : []), [model])
+  const [sort, setSort] = useState<SortState>(UNSORTED)
+  const [focusCol, setFocusCol] = useState(0)
+  const toggleSort = useCallback((col: number) => {
+    const key = String(col)
+    setSort(prev => prev.key !== key ? { key, dir: 'asc' } : prev.dir === 'asc' ? { key, dir: 'desc' } : UNSORTED)
+  }, [])
+  const sortedCol = sort.key != null && sort.dir != null ? Number(sort.key) : null
+  const order = useMemo(() => {
+    if (!model) return null
+    if (sortedCol == null || sortedCol >= model.header.length) return null
+    return sortedRowOrder(model.body, sortedCol, sort.dir === 'desc' ? 'desc' : 'asc', numeric[sortedCol])
+  }, [model, numeric, sortedCol, sort.dir])
+  const view = useMemo<MarkdownTableView | null>(() => {
+    if (!model) return null
+    const headerIndex = new Map(model.headerCells.map((cell, i) => [cell, i] as const))
+    const numericCells = new Set<HastElement>()
+    numeric.forEach((isNumeric, col) => {
+      if (!isNumeric) return
+      numericCells.add(model.headerCells[col])
+      for (const cells of model.bodyCells) if (cells[col]) numericCells.add(cells[col])
+    })
+    return { headerIndex, numericCells, sort, toggleSort, focusCol: Math.min(focusCol, model.header.length - 1), setFocusCol }
+  }, [model, numeric, sort, toggleSort, focusCol])
+  return { model, numeric, order, view }
+}
 
 /** A markdown table plus the row of copy actions beneath it.
  *
@@ -110,6 +185,17 @@ export function MarkdownTable({ node, children }: { node?: HastElement; children
   const toggleExpanded = () => {
     setWidthSaveFailed(!saveChatConfig({ ...loadChatConfig(), widenTables: !expanded }))
   }
+  const { model, numeric, order, view } = useTableView(node)
+  // The chart is offered only when there is a numeric column to draw, starts
+  // hidden, and follows the display order (`order`), so sorting the table
+  // re-draws it. The picked column is remembered while the table is on
+  // screen; a pick the data outgrew (a column that stopped being numeric as
+  // rows streamed in) falls back to the first numeric column.
+  const numericCols = useMemo(() => numeric.map((n, i) => (n ? i : -1)).filter(i => i >= 0), [numeric])
+  const [chartOpen, setChartOpen] = useState(false)
+  const [chartCol, setChartCol] = useState<number | null>(null)
+  const chartColumn = chartCol != null && numericCols.includes(chartCol) ? chartCol : numericCols[0]
+  const displayOrder = useMemo(() => order ?? (model ? model.body.map((_, i) => i) : []), [order, model])
 
   const copy = (target: CopyTarget) => {
     if (!node) return
@@ -182,8 +268,22 @@ export function MarkdownTable({ node, children }: { node?: HastElement; children
         // A narrowed fixed-layout column clips its content instead of painting
         // it over the neighbour; a header label ellipsizes (it never wraps).
         ? 'min-w-full border-collapse text-sm [overflow-wrap:normal] [word-break:normal] [&_tbody>tr:last-child>td]:border-b-0 [&_th]:overflow-hidden [&_th]:text-ellipsis [&_td]:overflow-hidden'
-        : 'min-w-full border-collapse text-sm [overflow-wrap:normal] [word-break:normal] [&_tbody>tr:last-child>td]:border-b-0'}>{columns.colgroup}{children}</table>{columns.grips}</div>
+        : 'min-w-full border-collapse text-sm [overflow-wrap:normal] [word-break:normal] [&_tbody>tr:last-child>td]:border-b-0'}>{columns.colgroup}<MarkdownTableCtx.Provider value={view}>{orderRows(children, order)}</MarkdownTableCtx.Provider></table>{columns.grips}</div>
       <div className={`mt-0.5 flex items-center justify-end gap-1 select-none opacity-0 group-hover/table:opacity-100 group-focus-within/table:opacity-100 transition-opacity ${HOVER_NONE_ACTIONS_ROW_CLS}`}>
+        {/* Only a table with a numeric column has something to chart. The word
+            flips Show chart / Hide chart like Widen / Narrow, and
+            `aria-expanded` carries the state; the row stays visible while the
+            chart is open (`group-focus-within` covers the picker, and the
+            hover rule the pointer) so Hide chart is always reachable. */}
+        {model && numericCols.length > 0 && (
+          <button type="button" data-testid="table-chart-toggle" className={TABLE_ACTION_BTN_CLS}
+            onClick={() => setChartOpen(o => !o)} aria-expanded={chartOpen} aria-pressed={chartOpen}
+            title={chartOpen ? i18nT('components.markdownRenderer.hide_chart') : i18nT('components.markdownRenderer.show_chart')}
+            aria-label={chartOpen ? i18nT('components.markdownRenderer.hide_chart') : i18nT('components.markdownRenderer.show_chart')}>
+            <ChartColumn size={13} aria-hidden="true" className={chartOpen ? 'text-accent' : undefined} />
+            <span aria-hidden="true">{chartOpen ? i18nT('components.markdownRenderer.hide_chart') : i18nT('components.markdownRenderer.show_chart')}</span>
+          </button>
+        )}
         {/* Shown only where a table can widen (index.css: a top-level
             assistant table in an unbordered transcript bubble); everywhere
             else `.markdown-table-expand` stays display:none. The visible word
@@ -217,6 +317,9 @@ export function MarkdownTable({ node, children }: { node?: HastElement; children
       )}
       {widthSaveFailed && (
         <ErrorNotice variant="inline" className="mt-1" message={i18nT('components.markdownRenderer.table_width_not_saved')} onDismiss={() => setWidthSaveFailed(false)} />
+      )}
+      {chartOpen && model && chartColumn != null && (
+        <MarkdownTableChart model={model} numeric={numeric} order={displayOrder} column={chartColumn} onColumn={setChartCol} />
       )}
     </div>
   )
