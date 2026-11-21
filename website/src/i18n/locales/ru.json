@@ -8944,7 +8944,8 @@
       "show_chart": "Показать диаграмму",
       "hide_chart": "Скрыть диаграмму",
       "chart_column": "Столбец диаграммы",
-      "chart_of_column": "Гистограмма столбца {{column}}"
+      "chart_of_column": "Гистограмма столбца {{column}}",
+      "sort_by_column": "Сортировать по {{column}}"
     },
     "markdownToc": {
       "contents": "Содержание",

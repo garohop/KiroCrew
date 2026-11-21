@@ -8314,7 +8314,8 @@
       "show_chart": "グラフを表示",
       "hide_chart": "グラフを非表示",
       "chart_column": "グラフの列",
-      "chart_of_column": "{{column}} の棒グラフ"
+      "chart_of_column": "{{column}} の棒グラフ",
+      "sort_by_column": "{{column}} で並べ替え"
     },
     "markdownToc": {
       "contents": "目次",

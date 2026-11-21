@@ -8524,7 +8524,8 @@
       "show_chart": "चार्ट दिखाएँ",
       "hide_chart": "चार्ट छिपाएँ",
       "chart_column": "चार्ट कॉलम",
-      "chart_of_column": "{{column}} का बार चार्ट"
+      "chart_of_column": "{{column}} का बार चार्ट",
+      "sort_by_column": "{{column}} के अनुसार क्रमबद्ध करें"
     },
     "markdownToc": {
       "contents": "विषय-सूची",

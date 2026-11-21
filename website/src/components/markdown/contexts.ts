@@ -270,6 +270,8 @@ export const ParagraphNoticeSlotCtx = createContext<HTMLElement | null>(null)
 export interface MarkdownTableView {
   /** Header cell -> column index, for the sort button; absent = no sort. */
   headerIndex: ReadonlyMap<HastElement, number>
+  /** Each column's header as plain text, for the sort button's name. */
+  header: readonly string[]
   /** Every cell (header and body) of a numeric column: right-aligned. */
   numericCells: ReadonlySet<HastElement>
   /** `key` is the sorted column's index as a string, or null for source order. */

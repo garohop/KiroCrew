@@ -8314,7 +8314,8 @@
       "show_chart": "显示图表",
       "hide_chart": "隐藏图表",
       "chart_column": "图表列",
-      "chart_of_column": "{{column}} 的条形图"
+      "chart_of_column": "{{column}} 的条形图",
+      "sort_by_column": "按 {{column}} 排序"
     },
     "markdownToc": {
       "contents": "目录",

@@ -3265,7 +3265,8 @@
       "show_chart": "Show chart",
       "hide_chart": "Hide chart",
       "chart_column": "Chart column",
-      "chart_of_column": "Bar chart of {{column}}"
+      "chart_of_column": "Bar chart of {{column}}",
+      "sort_by_column": "Sort by {{column}}"
     },
     "mcpAppFrame": {
       "collapse": "Collapse",

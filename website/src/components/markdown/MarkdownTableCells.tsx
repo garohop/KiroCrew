@@ -1,5 +1,7 @@
-import React, { useContext } from 'react'
+import React, { useContext, useId } from 'react'
 import type { Element as HastElement } from 'hast'
+import { ChevronsUpDown } from 'lucide-react'
+import { i18nT } from '../../i18n/t'
 import { SortArrow } from '../SortableHeader'
 import { MarkdownTableCtx } from './contexts'
 import { spa } from './elements'
@@ -23,7 +25,22 @@ const NUMERIC_CELL_CLS = 'text-right tabular-nums'
 /** The sort button restates the header's type scale rather than inheriting
  *  it, for the reason `SortableTableHead` gives: Tailwind's preflight resets a
  *  button's `font-size` to the browser default, not the cell's. */
-const SORT_BTN_CLS = 'inline-flex max-w-full items-center gap-1 cursor-pointer bg-transparent border-none p-0 text-[13px] font-semibold text-text-strong hover:text-accent'
+const SORT_BTN_CLS = 'group/sort inline-flex max-w-full items-center gap-1 cursor-pointer bg-transparent border-none p-0 text-[13px] font-semibold text-text-strong hover:text-accent'
+
+/**
+ * What an UNSORTED header shows at rest: a muted up/down pair, so a reader can
+ * tell the column sorts before pointing at it. Hover alone cannot carry that
+ * (a touch screen and a screenshot have no hover), and the dashboard's
+ * `SortableHeader` shows nothing until a column is sorted, which in a chat
+ * reply reads as a plain table. The sorted column swaps it for `SortArrow`.
+ * `shrink-0`, like the arrow: a narrowed header ellipsizes its label, not this.
+ * Hidden from assistive tech, which has the button's name and `aria-sort`.
+ * The group is NAMED: a bare `group-hover:` answers to any `.group` ancestor,
+ * and the table sits inside one, so every hint lit up when the table was hovered.
+ */
+function SortHint() {
+  return <ChevronsUpDown size={12} className="shrink-0 text-muted group-hover/sort:text-accent group-focus-visible/sort:text-accent" aria-hidden="true" />
+}
 
 /** Every sort button of the row the event came from, in column order. */
 function rowSortButtons(from: HTMLElement): HTMLButtonElement[] {
@@ -32,6 +49,7 @@ function rowSortButtons(from: HTMLElement): HTMLButtonElement[] {
 
 export function MdTableHeadCell({ node, children }: { node?: HastElement; children?: React.ReactNode }) {
   const view = useContext(MarkdownTableCtx)
+  const labelId = useId()
   const col = node ? view?.headerIndex.get(node) : undefined
   const numeric = node != null && view?.numericCells.has(node) === true
   const className = `${MD_TABLE_HEAD_CELL_CLS} whitespace-nowrap${numeric ? ` ${NUMERIC_CELL_CLS}` : ''}`
@@ -48,19 +66,24 @@ export function MdTableHeadCell({ node, children }: { node?: HastElement; childr
     e.preventDefault()
     next.focus()
   }
-  // The header's accessible name stays its own text (the button holds it), and
+  // The button is named "Sort by {column}" (and says so on hover), while the
+  // HEADER keeps the column's own text as its name through `aria-labelledby`,
+  // the way `SortableTableHead` keeps its grip out of the header's name: a cell
+  // is named from its content, and a data cell is announced under its header,
+  // so without it every cell in the column would read "Sort by Runs, 1,250".
   // `aria-sort` carries the order, as the dashboard's `SortableHeader` does.
+  const sortBy = i18nT('components.markdownRenderer.sort_by_column', { column: view.header[col] ?? '' })
   return (
-    <th {...spa('th', node)} className={className} aria-sort={active ? (view.sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
-      <button type="button" className={SORT_BTN_CLS} data-testid="table-sort"
+    <th {...spa('th', node)} className={className} aria-labelledby={labelId} aria-sort={active ? (view.sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+      <button type="button" className={SORT_BTN_CLS} data-testid="table-sort" title={sortBy} aria-label={sortBy}
         tabIndex={col === view.focusCol ? 0 : -1}
         onFocus={() => view.setFocusCol(col)} onKeyDown={onKeyDown} onClick={() => view.toggleSort(col)}>
         {/* The label gives way before the arrow does, as in `SortableTableHead`:
             a narrowed column (`[&_th]:text-ellipsis` in MarkdownTable) can only
             ellipsize text inside a block, and an inline-flex button is atomic,
             so the span is what truncates. */}
-        <span className="truncate min-w-0">{children}</span>
-        {active && <SortArrow dir={view.sort.dir} />}
+        <span id={labelId} className="truncate min-w-0">{children}</span>
+        {active ? <SortArrow dir={view.sort.dir} /> : <SortHint />}
       </button>
     </th>
   )

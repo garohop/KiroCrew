@@ -8524,7 +8524,8 @@
       "show_chart": "Diagramm anzeigen",
       "hide_chart": "Diagramm ausblenden",
       "chart_column": "Diagrammspalte",
-      "chart_of_column": "Balkendiagramm von {{column}}"
+      "chart_of_column": "Balkendiagramm von {{column}}",
+      "sort_by_column": "Nach {{column}} sortieren"
     },
     "markdownToc": {
       "contents": "Inhalt",

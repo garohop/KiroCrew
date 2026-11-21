@@ -95,7 +95,7 @@ function useTableView(node: HastElement | undefined) {
       numericCells.add(model.headerCells[col])
       for (const cells of model.bodyCells) if (cells[col]) numericCells.add(cells[col])
     })
-    return { headerIndex, numericCells, sort, toggleSort, focusCol: Math.min(focusCol, model.header.length - 1), setFocusCol }
+    return { headerIndex, header: model.header, numericCells, sort, toggleSort, focusCol: Math.min(focusCol, model.header.length - 1), setFocusCol }
   }, [model, numeric, sort, toggleSort, focusCol])
   return { model, numeric, order, view }
 }

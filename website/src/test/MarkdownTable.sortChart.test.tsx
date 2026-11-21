@@ -51,7 +51,8 @@ describe('markdown table sorting', () => {
 
     fireEvent.click(runs)
     expect(th).toHaveAttribute('aria-sort', 'none')
-    expect(th.querySelector('svg')).toBeNull()
+    expect(th.querySelector('svg.lucide-chevron-up, svg.lucide-chevron-down')).toBeNull()
+    expect(th.querySelector('svg.lucide-chevrons-up-down')).not.toBeNull()
     expect(bodyFirstCells(container)).toEqual(['gateway', 'indexer', 'mailer', 'search'])
 
     // The rows are the elements react-markdown rendered, reordered: the code
@@ -60,6 +61,29 @@ describe('markdown table sorting', () => {
     expect(container.querySelector('tbody tr:first-child code')).not.toBeNull()
     await act(async () => { fireEvent.click(screen.getByTestId('table-copy-markdown')) })
     expect(copyToClipboard).toHaveBeenCalledWith(TABLE)
+  })
+
+  it('shows every unsorted header as sortable at rest, named "Sort by …", and only the sorted column as a direction', () => {
+    render(<MarkdownRenderer content={TABLE} />)
+    const headers = screen.getAllByTestId('table-sort')
+    // At rest: the muted up/down pair on all five, no direction anywhere.
+    for (const h of headers) {
+      expect(h.querySelector('svg.lucide-chevrons-up-down')).not.toBeNull()
+      expect(h.querySelector('svg.lucide-chevron-up, svg.lucide-chevron-down')).toBeNull()
+      expect(h.className).toMatch(/\bcursor-pointer\b/)
+    }
+    expect(headers[1]).toHaveAttribute('aria-label', 'Sort by Runs')
+    expect(headers[1]).toHaveAttribute('title', 'Sort by Runs')
+    // The column header itself is still named by its text, so a data cell is
+    // announced under "Runs", not under the button's verb.
+    expect(screen.getByRole('columnheader', { name: 'Runs' })).toBe(headers[1].closest('th'))
+
+    fireEvent.click(headers[1])
+    expect(headers[1].querySelector('svg.lucide-chevrons-up-down')).toBeNull()
+    expect(headers[1].querySelector('svg.lucide-chevron-up')).not.toBeNull()
+    expect(headers[1]).toHaveAttribute('aria-label', 'Sort by Runs')
+    expect(headers[0].querySelector('svg.lucide-chevrons-up-down')).not.toBeNull()
+    expect(headers[0].querySelector('svg.lucide-chevron-up, svg.lucide-chevron-down')).toBeNull()
   })
 
   it('sorts a text column by locale and keeps blank cells last in both directions', () => {

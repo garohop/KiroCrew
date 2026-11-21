@@ -8734,7 +8734,8 @@
       "show_chart": "Afficher le graphique",
       "hide_chart": "Masquer le graphique",
       "chart_column": "Colonne du graphique",
-      "chart_of_column": "Graphique à barres de {{column}}"
+      "chart_of_column": "Graphique à barres de {{column}}",
+      "sort_by_column": "Trier par {{column}}"
     },
     "markdownToc": {
       "contents": "Sommaire",

@@ -8524,7 +8524,8 @@
       "show_chart": "চার্ট দেখান",
       "hide_chart": "চার্ট লুকান",
       "chart_column": "চার্ট কলাম",
-      "chart_of_column": "{{column}}-এর বার চার্ট"
+      "chart_of_column": "{{column}}-এর বার চার্ট",
+      "sort_by_column": "{{column}} অনুসারে সাজান"
     },
     "markdownToc": {
       "contents": "বিষয়সূচি",

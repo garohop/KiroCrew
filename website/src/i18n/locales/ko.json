@@ -8314,7 +8314,8 @@
       "show_chart": "차트 표시",
       "hide_chart": "차트 숨기기",
       "chart_column": "차트 열",
-      "chart_of_column": "{{column}} 막대 차트"
+      "chart_of_column": "{{column}} 막대 차트",
+      "sort_by_column": "{{column}} 기준으로 정렬"
     },
     "markdownToc": {
       "contents": "목차",
